@@ -31,6 +31,9 @@ public class MovieCatalogResource {
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId) {
 
         // Get all rated movie Ids
+        // For each movie Id, call movie service to get the details
+        // Put them all together
+
         /** This part will be taken care of by calling Rating info microservice to avoid hardcoding */
         List<Rating> ratings = Arrays.asList(
                 new Rating("123", 4),
@@ -52,12 +55,8 @@ public class MovieCatalogResource {
             return new CatalogItem(movie.getName(), "Action", rating.getRating());
         }).collect(Collectors.toList());
 
-        // For each movie Id, call movie service to get the details
-
-        // Put them all together
-
         /** Hard coded in initial step to just return a simple object */
-/*        return Collections.singletonList(
+    /* return Collections.singletonList(
                 new CatalogItem("Iron Man", "Action", 4)
         );*/
 
