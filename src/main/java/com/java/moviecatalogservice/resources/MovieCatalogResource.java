@@ -3,6 +3,7 @@ package com.java.moviecatalogservice.resources;
 import com.java.moviecatalogservice.models.CatalogItem;
 import com.java.moviecatalogservice.models.Movie;
 import com.java.moviecatalogservice.models.Rating;
+import com.java.moviecatalogservice.models.UserRating;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,35 +32,38 @@ public class MovieCatalogResource {
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId) {
 
         // Get all rated movie Ids
-        // For each movie Id, call movie service to get the details
-        // Put them all together
 
         /** This part will be taken care of by calling Rating info microservice to avoid hardcoding */
-        List<Rating> ratings = Arrays.asList(
+        /*List<Rating> ratings = Arrays.asList(
                 new Rating("123", 4),
                 new Rating("124", 3)
-        );
+        );*/
+
+        UserRating ratings = restTemplate.getForObject("http://localhost:8083/ratingsdata/users/" + userId, UserRating.class);
 
         /** Url should be dynamic to avoid issues */
-        return ratings.stream().map(rating -> {
+        return ratings.getUserRating().stream().map(rating -> {
+            // For each movie Id, call movie service to get the details
              Movie movie = restTemplate.getForObject("http://localhost:8082/movies/" + rating.getMovieId(), Movie.class);
-
-             /** Use of Webclient instead of RestTemplate */
-            /* Movie movie = webClientBuilder.build()
-                    .get()
-                    .uri("http://localhost:8082/movies/" + rating.getMovieId())
-                    .retrieve()
-                    .bodyToMono(Movie.class)
-                    .block();*/
-
+            // Put them all together
             return new CatalogItem(movie.getName(), "Action", rating.getRating());
         }).collect(Collectors.toList());
 
         /** Hard coded in initial step to just return a simple object */
-    /* return Collections.singletonList(
+        /* return Collections.singletonList(
                 new CatalogItem("Iron Man", "Action", 4)
         );*/
 
     }
 
 }
+
+/**
+ * Use of Webclient instead of RestTemplate
+ */
+            /* Movie movie = webClientBuilder.build()
+                    .get()
+                    .uri("http://localhost:8082/movies/" + rating.getMovieId())
+                    .retrieve()
+                    .bodyToMono(Movie.class)
+                    .block();*/
